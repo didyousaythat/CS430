@@ -1,4 +1,5 @@
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
 
    // initialize varibles
    unsigned int *pixmap;
@@ -25,8 +26,8 @@ void readFile(File *filePtr, int number, char *fileName, unsigned int *pixmap){
    // determine if it is p6 or p3
    if(argv[number] == 6)
    {
-     // intialize varibles
-     const char READ_BYTE_FLAG[] = "rb"
+      // intialize varibles
+      const char READ_BYTE_FLAG[] = "rb"
 
       filePtr = fopen(fileName, READ_BYTE_FLAG);
 
@@ -34,24 +35,19 @@ void readFile(File *filePtr, int number, char *fileName, unsigned int *pixmap){
       if(filePtr != NULL)
       {
 
-        pixmap = (unsigned int *)malloc(width * height * sizeof(int));
-
-
+         pixmap = (unsigned int *)malloc(width * height * sizeof(int));
       }
       else
       {
-        printf("File Not Found: \n");
+         printf("File Not Found: \n");
       }
 
    }
 
    if(argv[number] == 3)
    {
-
       pixmap = (unsigned int *)malloc(width * height * sizeof(int));
-
    }
-
    else
    {
       printf("INCORRECT PPM NUMBER ARGUMENT: \n");
