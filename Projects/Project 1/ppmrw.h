@@ -21,8 +21,6 @@ struct fileHeader
 
    int ppmType;
 
-   // comment set to length
-   char comment[60];
 };
 
 //file name constants
@@ -38,6 +36,8 @@ extern const int PPM6;
 int validateParams( int num_of_params, char const *argv[] );
 void readFileP3(FILE *filePtr, unsigned int *pixmap);
 void readFileP6(FILE *filePtr, unsigned int *pixmap);
+void writeToP3(FILE *filePtr, unsigned int *pixmap);
+void writeToP6(FILE *filePtr, unsigned int *pixmap);
 struct fileHeader readHeader(FILE *filePtr);
 int validateParams(int argc, char const *argv[] );
 void displayErrorMessage(int errorCode);

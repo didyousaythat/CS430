@@ -5,9 +5,6 @@
 */
 
 //define constants
-const char INPUT_FILE_NAME[];
-const char OUTPUT_FILE_NAME[];
-
 const int ARGUMENT_NUMBER = 4;
 const int PPM3 = 3;
 const int PPM6 = 6;
@@ -83,11 +80,6 @@ int main(int argc, char const *argv[])
    return 0;
 }
 
-int validateParams( int num_of_params, char const *argv[] )
-{
-	int ppmType = atoi(argv[1]);
-}
-
 /* Ascii information
 *
 *
@@ -100,7 +92,7 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
    int widthIndex;
    int fileHeight;
    int fileWidth;
-   int *pixel;
+   unsigned int *pixel;
    int rgbTempVal;
 
    // declare variables
@@ -121,17 +113,17 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
       for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
          // scan the red pixel and place into the pixel array
-         fscanf(filePtr, "%d", rgbTempVal);
+         fscanf(filePtr, "%d", &rgbTempVal);
 
          pixel[0] = rgbTempVal;
 
          // scan the green pixel and place into the pixel array
-         fscanf(filePtr, "%d", rgbTempVal);
+         fscanf(filePtr, "%d", &rgbTempVal);
 
          pixel[1] = rgbTempVal;
 
          // scan the blue pixel and place into the pixel array
-         fscanf(filePtr, "%d", rgbTempVal);
+         fscanf(filePtr, "%d", &rgbTempVal);
 
          pixel[2] = rgbTempVal;
 
@@ -147,7 +139,7 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
 *
 *
 */
-void writeFileP3(FILE *filePtr, unsigned int *pixmap)
+void writeToP3(FILE *filePtr, unsigned int *pixmap)
 {
 
 }
@@ -164,7 +156,7 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
    int widthIndex;
    int fileHeight;
    int fileWidth;
-   int *pixel;
+   unsigned int *pixel;
    unsigned int rgbBytes;
 
    // declare variables
@@ -185,7 +177,7 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
       for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
          // scan bytes and store in rgbBytes
-         fread(rgbBytes, 1, 3, filePtr);
+         fread(&rgbBytes, 1, 3, filePtr);
 
          // translate binary to integers and store red pixel first
          pixel[0] = rgbBytes & 0xff;
