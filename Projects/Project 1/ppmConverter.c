@@ -5,14 +5,17 @@
 */
 
 //define constants
-const char INPUT_FILE_NAME[] = "input.ppm";
-const char OUTPUT_FILE_NAME[] = "output.ppm";
+const char INPUT_FILE_NAME[];
+const char OUTPUT_FILE_NAME[];
+
+const int ARGUMENT_NUMBER = 4;
 const int PPM3 = 3;
-const int PPM = 6;
+const int PPM6 = 6;
+struct fileHeader fileHeader;
 
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <string.h>
 #include "ppmConverter.h"
 
 
@@ -23,24 +26,49 @@ const int PPM = 6;
 */
 int main(int argc, char const *argv[])
 {
+   
+   int errorCode = validateParams( argc,  argv );
+	
+	if( errorCode != NO_ERROR )
+	{
+		displayErrorMessage(errorCode);
+		
+		return EXIT_FAILURE;
+	}
+	
+	if( errorCode == NO_OUTPUT_FILE_ERROR )
+	{
+		displayErrorMessage(errorCode);
+	}
 
 
    // initialize varibles
    unsigned int *pixmap;
-   File *filePtr;
-   int ppmType = atoi(argv[1]);
+   const char READ_FILE_FLAG[] = "r";
+   FILE * filePtr;
+   int ppmConversionType = atoi(argv[1]);
    char *fileName = argv[2];
 
    if(argc != 4)
    {
 
    }
-   // read file save to pixmap
-      // function: readFile
-   readFile(filePtr, ppmType, fileName, pixmap);
 
-   // check for what to convert to P3 or P6
+   // open file for reading
+   filePtr = fopen(fileName, READ_FILE_FLAG);
 
+   // get header information
+   fileHeader = readHeader(filePtr);
+
+   // read file depending on type
+   if(fileHeader->ppmType == PPM3)
+   {
+	   readFileP3(filePtr, pixmap);
+   }
+   else
+   {
+	   readFileP6(filePtr, pixmap);
+   }
 
    // convert file to P3
       // function: writeToP3()
@@ -61,29 +89,18 @@ int validateParams( int num_of_params, char const *argv[] )
 *
 *
 */
-void readFileP6(File *filePtr, int ppmNumber, char *fileName, unsigned int *pixmap)
+void readFileP3(FILE *filePtr, unsigned int *pixmap)
 {
    // intialize varibles
-   const char READ_BYTE_FLAG[] = "rb";
    const int heightIndex;
    const int widthIndex;
    const int fileHeight;
    const int fileWidth;
-   const char comment[];
-   struct fileHeader fileHeader;
-
-   filePtr = fopen(fileName, READ_BYTE_FLAG);
-
-
-   // get the file header information
-   fileHeader = readHeader(filePtr);
 
    // declare variables
    heightIndex = fileHeader.height;
 
    widthIndex = fileHeader.width;
-
-   comment = fileHeader.comment;
 
    // allocate memory for pixmap
    pixmap = (unsigned int *)malloc(width * height * sizeof(int));
@@ -112,28 +129,18 @@ void readFileP6(File *filePtr, int ppmNumber, char *fileName, unsigned int *pixm
 *
 *
 */
-void readFileP6(File *filePtr, int ppmNumber, char *fileName, unsigned int *pixmap)
+void readFileP6(FILE *filePtr, unsigned int *pixmap)
 {
    // intialize varibles
-   const char READ_ASCII_FLAG[] = "r";
    const int heightIndex;
    const int widthIndex;
    const int fileHeight;
    const int fileWidth;
-   const char comment[];
-   struct fileHeader fileHeader;
-
-   filePtr = fopen(fileName, READ_ASCII_FLAG);
-
-   // read the head information and store in struct
-   fileHeader = readHeaderFile(filePtr);
 
    // declare variables
    heightIndex = fileHeader.height;
 
    widthIndex = fileHeader.width;
-
-   comment = fileHeader.comment;
 
    // asssign size
    pixmap = (unsigned int *)malloc(width * height * sizeof(int));
@@ -162,11 +169,11 @@ void readFileP6(File *filePtr, int ppmNumber, char *fileName, unsigned int *pixm
 /*
 
 */
-fileHeader readHeader(File *filePtr)
+fileHeader readHeader(FILE *filePtr)
 {
    // initialize varibles
    int lineCtr = 0;
-   int height = 0, width = 0;
+   fileHeader.height = 0, fileHeader.width = 0;
    int ch = 0;
    char dataBuffer[100];
    ch = fgetc(filePtr);
@@ -174,16 +181,63 @@ fileHeader readHeader(File *filePtr)
    {
        if(ch == '#')
        {
-           while(ch != '\n')
+           do
            {
+              ch = fgetc(filePtr);
+           } while (ch != '\n');
+           ch = getc(filePtr);           
+       }
 
-           }
+       if(fscanf(filePtr, '%d') != 1)
+       {
+          if(fileHeader.width == 0)
+          {
+             fileHeader.width = ch
+          }
        }
    }
    //fileHeader.height = height;
    //fileHeader.width = width;
    //
 }
+
+int validateParams(int argc, char const *argv[] )
+{
+		
+	//check that the correct number of arguments are provided
+	if( argc == 3 )
+	{
+		return NO_OUTPUT_FILE_ERROR;
+	}
+	else if ( argc != ARGUMENT_NUMBER )
+	{
+		return ARGUMENT_NUM_ERROR;
+	}
+	
+	else if( atoi(argv[1]) != PPM3 && atoi(argv[1]) != PPM6)
+	{
+		return PPM_TYPE_ERROR;
+	}
+	else
+	{
+		return NO_ERROR;
+	}
+
+}
+
+void displayErrorMessage(int errorCode)
+{
+	char errorMsgs[6][200] = {
+		"No Error",
+		"Wrong number of command line arguments. The format should follow:\n\n"
+			"\t<ppmToConvertTo inputFile outputFile>\n",
+		"No output file was provided, data will be written to output.ppm\n",
+		"PPM type to convert to must be either a 3 or a 6\n" };
+					
+	printf("%s\nProgram terminated.", errorMsgs[errorCode] );
+}
+
+
 
 
 
