@@ -16,7 +16,7 @@ struct fileHeader fileHeader;
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "ppmConverter.h"
+#include "ppmrw.h"
 
 
 /*
@@ -41,13 +41,12 @@ int main(int argc, char const *argv[])
 		displayErrorMessage(errorCode);
 	}
 
-
    // initialize varibles
    unsigned int *pixmap;
    const char READ_FILE_FLAG[] = "r";
    FILE * filePtr;
    int ppmConversionType = atoi(argv[1]);
-   char *fileName = argv[2];
+   char const *fileName = argv[2];
 
    if(argc != 4)
    {
@@ -169,7 +168,7 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
 /*
 
 */
-fileHeader readHeader(FILE *filePtr)
+struct fileHeader readHeader(FILE *filePtr)
 {
    // initialize varibles
    int lineCtr = 0;
