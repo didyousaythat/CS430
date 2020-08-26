@@ -19,6 +19,8 @@ struct fileHeader
 
    int width;
 
+   int ppmType;
+
    // comment set to length
    char comment[60];
 };
