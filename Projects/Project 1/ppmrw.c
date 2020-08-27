@@ -5,18 +5,16 @@
 */
 
 //define constants
-const char INPUT_FILE_NAME[];
-const char OUTPUT_FILE_NAME[];
-
 const int ARGUMENT_NUMBER = 4;
 const int PPM3 = 3;
 const int PPM6 = 6;
-struct fileHeader fileHeader;
+struct FileHeader *header;
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "ppmConverter.h"
+
+#include "ppmrw.h"
 
 
 /*
@@ -26,7 +24,7 @@ struct fileHeader fileHeader;
 */
 int main(int argc, char const *argv[])
 {
-   
+   // validate if given Params are valid
    int errorCode = validateParams( argc,  argv );
 	
 	if( errorCode != NO_ERROR )
@@ -41,27 +39,21 @@ int main(int argc, char const *argv[])
 		displayErrorMessage(errorCode);
 	}
 
-
    // initialize varibles
    unsigned int *pixmap;
    const char READ_FILE_FLAG[] = "r";
-   FILE * filePtr;
+   FILE *filePtr;
    int ppmConversionType = atoi(argv[1]);
-   char *fileName = argv[2];
-
-   if(argc != 4)
-   {
-
-   }
+   char const *fileName = argv[2];
 
    // open file for reading
    filePtr = fopen(fileName, READ_FILE_FLAG);
 
    // get header information
-   fileHeader = readHeader(filePtr);
+   *header = readHeader(filePtr);
 
    // read file depending on type
-   if(fileHeader->ppmType == PPM3)
+   if(header->ppmType == PPM3)
    {
 	   readFileP3(filePtr, pixmap);
    }
@@ -72,16 +64,21 @@ int main(int argc, char const *argv[])
 
    // convert file to P3
       // function: writeToP3()
+   if (ppmConversionType == 3)
+   {
+      writeToP3(filePtr, pixmap);
+   }
 
    // convert file to P6
       // fuction: writeToP6()
+   else
+   {
+      writeToP6(filePtr, pixmap);
+   }
+   
 
+   // return 0
    return 0;
-}
-
-int validateParams( int num_of_params, char const *argv[] )
-{
-	int ppmType = atoi(argv[1]);
 }
 
 /* Ascii information
@@ -92,18 +89,20 @@ int validateParams( int num_of_params, char const *argv[] )
 void readFileP3(FILE *filePtr, unsigned int *pixmap)
 {
    // intialize varibles
-   const int heightIndex;
-   const int widthIndex;
-   const int fileHeight;
-   const int fileWidth;
+   int heightIndex;
+   int widthIndex;
+   int fileHeight;
+   int fileWidth;
+   unsigned int *pixel;
+   int rgbTempVal;
 
    // declare variables
-   heightIndex = fileHeader.height;
+   heightIndex = header->height;
 
-   widthIndex = fileHeader.width;
+   widthIndex = header->width;
 
    // allocate memory for pixmap
-   pixmap = (unsigned int *)malloc(width * height * sizeof(int));
+   pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
 
    // make a pixel
    pixel = pixmap;
@@ -114,14 +113,36 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
    {
       for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
-         int ch;
+         // scan the red pixel and place into the pixel array
+         fscanf(filePtr, "%d", &rgbTempVal);
 
-         ch = fgetc(filePtr);
+         pixel[0] = rgbTempVal;
 
-         pixel[heightIndex + widthIndex] = ch;
+         // scan the green pixel and place into the pixel array
+         fscanf(filePtr, "%d", &rgbTempVal);
+
+         pixel[1] = rgbTempVal;
+
+         // scan the blue pixel and place into the pixel array
+         fscanf(filePtr, "%d", &rgbTempVal);
+
+         pixel[2] = rgbTempVal;
+
+         // move the pixel pointer three spaces
+         pixel += 3;
 
       }
    }
+}
+
+/* Writes a file that is in p3 format
+*
+*
+*
+*/
+void writeToP3(FILE *filePtr, unsigned int *pixmap)
+{
+
 }
 
 /* Byte information
@@ -132,18 +153,20 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
 void readFileP6(FILE *filePtr, unsigned int *pixmap)
 {
    // intialize varibles
-   const int heightIndex;
-   const int widthIndex;
-   const int fileHeight;
-   const int fileWidth;
+   int heightIndex;
+   int widthIndex;
+   int fileHeight;
+   int fileWidth;
+   unsigned int *pixel;
+   unsigned int rgbBytes;
 
    // declare variables
-   heightIndex = fileHeader.height;
+   heightIndex = header->height;
 
-   widthIndex = fileHeader.width;
+   widthIndex = header->width;
 
    // asssign size
-   pixmap = (unsigned int *)malloc(width * height * sizeof(int));
+   pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
 
    // make a pixel
    pixel = pixmap;
@@ -154,13 +177,22 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
    {
       for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
-         // initialize int for reading
-         int ch;
+         // scan bytes and store in rgbBytes
+         fread(&rgbBytes, 1, 3, filePtr);
 
-         // read file and store in ch
-         ch = fgetc(filePtr);
+         // translate binary to integers and store red pixel first
+         pixel[0] = rgbBytes & 0xff;
 
-         pixel[heightIndex + widthIndex] = ch;
+         // translate binary to integers and store green pixel
+
+         pixel[1] = (rgbBytes >> 8) & 0xff;
+
+         // translate binary to integers and store blue pixel 
+
+         pixel[2] = (rgbBytes >> 16) & 0xff;
+
+         // move the pixel pointer three spaces
+         pixel += 3;
       }
    }
 
@@ -169,22 +201,24 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
 /*
 Identifies the file and reads the parameters of height, width, and max
 */
-void fileHeader readHeader(FILE *filePtr)
+struct FileHeader readHeader(FILE *filePtr)
 {
    // initialize varibles
    //int lineCtr = 0;
-   fileHeader->height = 0, fileHeader->width = 0;
-   int ch = 0;
-   char dataBuffer[100];
+   header->height = 0, header->width = 0, header->max = 0;
+   char ch = 0;
+   int value = 0;
+   //char dataBuffer[100];
 
-   fscanf(filePtr, "P%c\n", &ch);
+   fscanf(filePtr, "P%i\n", &value);
 
-   if(ch != 3 || ch != '6')
+   if(value != 3 || value != 6)
    {
-      displayErrorMessage(PPM_TYPE_ERROR);
+      printf("this is an error");
    }
+   header->ppmType = value;
 
-   while(filePtr != EOF)
+   while(!feof(filePtr) || header->max != 0)
    {
        if(ch == '#')
        {
@@ -194,18 +228,21 @@ void fileHeader readHeader(FILE *filePtr)
            } while (ch != '\n');
            ch = getc(filePtr);           
        }
-
-       if(fscanf(filePtr, '%d') != 1)
-       {
-          if(fileHeader.width == 0)
-          {
-             fileHeader.width = ch
-          }
-       }
+       
+      if(header->width == 0)
+      {
+         header->width = value;
+      }
+      else if(header->height == 0)
+      {
+         header->width = value;
+      }
+      else
+      {
+         header->max = value;
+      }
    }
-   //fileHeader.height = height;
-   //fileHeader.width = width;
-   //
+   return *header;
 }
 
 int validateParams(int argc, char const *argv[] )

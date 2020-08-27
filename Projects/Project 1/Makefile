@@ -2,10 +2,10 @@ CC = gcc
 CFLAGS = -Wall
 RM = rm -f
 
-all: ppmConverter
+all: ppmrw
 
-ppmConverter: ppmConverter.c
-	$(CC) $(CFLAGS) ppmConverter.c -o ppmConverter
+ppmConverter: ppmrw.c ppmrw.h
+	$(CC) $(CFLAGS) ppmrw.c ppmrw.h -o ppmrw
 
 clean:
-	$(RM) ppmConverter *~s
+	$(RM) ppmrw *~s
