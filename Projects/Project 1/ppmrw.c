@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
 	{
 		displayErrorMessage(errorCode);
 		
-		return EXIT_FAILURE;
+		return EXIT_FAILURE; 
 	}
 	
 	if( errorCode == NO_OUTPUT_FILE_ERROR )
@@ -75,7 +75,6 @@ int main(int argc, char const *argv[])
    {
       writeToP6(filePtr, pixmap);
    }
-   
 
    // return 0
    return 0;
@@ -143,6 +142,11 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
 void writeToP3(FILE *filePtr, unsigned int *pixmap)
 {
 
+}
+
+void writeToP6(FILE *filePtr, unsigned int *pixmap)
+{
+   
 }
 
 /* Byte information

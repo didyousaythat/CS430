@@ -20,6 +20,8 @@ typedef struct FileHeader
    int width;
 
    int ppmType;
+   
+   int max;
 
 } FileHeader;
 
@@ -41,8 +43,5 @@ void writeToP6(FILE *filePtr, unsigned int *pixmap);
 struct FileHeader readHeader(FILE *filePtr);
 int validateParams(int argc, char const *argv[] );
 void displayErrorMessage(int errorCode);
-
-
-
 
 #endif

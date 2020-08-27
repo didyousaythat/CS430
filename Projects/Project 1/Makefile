@@ -4,8 +4,8 @@ RM = rm -f
 
 all: ppmrw
 
-ppmConverter: ppmrw.c ppmrw.h
-	$(CC) $(CFLAGS) ppmrw.c ppmrw.h -o ppmrw
+ppmrw.o : ppmrw.c ppmrw.h
+	$(CC) $(CFLAGS) ppmrw.c
 
 clean:
 	$(RM) ppmrw *~s
