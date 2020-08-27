@@ -167,16 +167,23 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
 }
 
 /*
-
+Identifies the file and reads the parameters of height, width, and max
 */
-fileHeader readHeader(FILE *filePtr)
+void fileHeader readHeader(FILE *filePtr)
 {
    // initialize varibles
-   int lineCtr = 0;
-   fileHeader.height = 0, fileHeader.width = 0;
+   //int lineCtr = 0;
+   fileHeader->height = 0, fileHeader->width = 0;
    int ch = 0;
    char dataBuffer[100];
-   ch = fgetc(filePtr);
+
+   fscanf(filePtr, "P%c\n", &ch);
+
+   if(ch != 3 || ch != '6')
+   {
+      displayErrorMessage(PPM_TYPE_ERROR);
+   }
+
    while(filePtr != EOF)
    {
        if(ch == '#')
@@ -236,8 +243,6 @@ void displayErrorMessage(int errorCode)
 					
 	printf("%s\nProgram terminated.", errorMsgs[errorCode] );
 }
-
-
 
 
 
