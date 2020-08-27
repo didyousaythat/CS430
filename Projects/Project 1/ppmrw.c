@@ -203,21 +203,23 @@ Identifies the file and reads the parameters of height, width, and max
 */
 struct FileHeader readHeader(FILE *filePtr)
 {
-   // initialize varibles
-   //int lineCtr = 0;
+   //initialize variables
    header->height = 0, header->width = 0, header->max = 0;
    char ch = 0;
    int value = 0;
-   //char dataBuffer[100];
 
+   //read the first line of file to determine header
    fscanf(filePtr, "P%i\n", &value);
 
+   //determine ppm type and validity
    if(value != 3 || value != 6)
    {
-      printf("this is an error");
+      displayErrorMessage(PPM_TYPE_ERROR);
    }
+   //assign type value
    header->ppmType = value;
 
+   //loop through rest of header
    while(!feof(filePtr) || header->max != 0)
    {
        if(ch == '#')
@@ -229,6 +231,7 @@ struct FileHeader readHeader(FILE *filePtr)
            ch = getc(filePtr);           
        }
        
+       //assign the width, height, and max with each int encounter
       if(header->width == 0)
       {
          header->width = value;
@@ -242,6 +245,7 @@ struct FileHeader readHeader(FILE *filePtr)
          header->max = value;
       }
    }
+   //return value of header struct
    return *header;
 }
 
