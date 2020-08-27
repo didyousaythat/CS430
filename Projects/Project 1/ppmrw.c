@@ -270,18 +270,22 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
 /*
 Identifies the file and reads the parameters of height, width, and max
 */
-struct FileHeader readHeader(FILE *filePtr)
+void readHeader(FILE *filePtr)
 {
    //initialize variables
-   header->height = 0, header->width = 0, header->max = 0;
+   header = (FileHeader *)malloc(sizeof(FileHeader));
+   header->height = 0; 
+   header->width = 0;
+   header->max = 0;
    char ch = 0;
    int value = 0;
+   char dataBuffer[100];
 
    //read the first line of file to determine header
    fscanf(filePtr, "P%i\n", &value);
 
    //determine ppm type and validity
-   if(value != 3 || value != 6)
+   if(value != 3 && value != 6)
    {
       displayErrorMessage(PPM_TYPE_ERROR);
    }
@@ -300,7 +304,9 @@ struct FileHeader readHeader(FILE *filePtr)
            ch = getc(filePtr);           
        }
        
-       //assign the width, height, and max with each int encounter
+      //assign the width, height, and max with each int encounter
+      fscanf(filePtr, "%s", dataBuffer);
+      value = atoi(dataBuffer);
       if(header->width == 0)
       {
          header->width = value;
@@ -314,8 +320,6 @@ struct FileHeader readHeader(FILE *filePtr)
          header->max = value;
       }
    }
-   //return value of header struct
-   return *header;
 }
 
 int validateParams(int argc, char const *argv[] )

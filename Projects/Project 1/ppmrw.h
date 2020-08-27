@@ -13,7 +13,7 @@ typedef enum ParamErrorCodes
 } ParamErrorCodes;
 
 // struct for fileHeader
-typedef struct FileHeader
+typedef struct
 {
    int height;
 
@@ -23,7 +23,9 @@ typedef struct FileHeader
    
    int max;
 
-} FileHeader;
+   int max;
+
+}FileHeader;
 
 //file name constants
 extern const char INPUT_FILE_NAME[];
@@ -40,7 +42,7 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap);
 void readFileP6(FILE *filePtr, unsigned int *pixmap);
 void writeToP3(FILE *filePtr, unsigned int *pixmap);
 void writeToP6(FILE *filePtr, unsigned int *pixmap);
-struct FileHeader readHeader(FILE *filePtr);
+void readHeader(FILE *filePtr);
 int validateParams(int argc, char const *argv[] );
 void displayErrorMessage(int errorCode);
 
