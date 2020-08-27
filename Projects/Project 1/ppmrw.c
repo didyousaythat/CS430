@@ -38,6 +38,8 @@ int main(int argc, char const *argv[])
 	if( errorCode == NO_OUTPUT_FILE_ERROR )
 	{
 		displayErrorMessage(errorCode);
+      
+
 	}
 
 
@@ -51,7 +53,7 @@ int main(int argc, char const *argv[])
    char const *fileName = argv[2];
    
    
-   //TODO: verify that a file name was given, otherwise, create ones
+   //TODO: verify that a file name was given, otherwise, create one
    char const *outFileName = argv[3];
    
    
@@ -351,7 +353,13 @@ int validateParams(int argc, char const *argv[] )
 	//check that the correct number of arguments are provided
 	if( argc == 3 )
 	{
-		return NO_OUTPUT_FILE_ERROR;
+      if( atoi(argv[1]) != PPM3 && atoi(argv[1]) != PPM6)
+      {
+         return PPM_TYPE_ERROR;
+      }
+         
+      return NO_OUTPUT_FILE_ERROR;
+   
 	}
 	else if ( argc != ARGUMENT_NUMBER )
 	{
