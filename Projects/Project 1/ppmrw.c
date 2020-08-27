@@ -8,7 +8,8 @@
 const int ARGUMENT_NUMBER = 4;
 const int PPM3 = 3;
 const int PPM6 = 6;
-struct FileHeader *header;
+const char READ_FILE_FLAG[] = "r";
+const char WRITE_FILE_FLAG[] = "w";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,7 +28,7 @@ int main(int argc, char const *argv[])
    // validate if given Params are valid
    int errorCode = validateParams( argc,  argv );
 	
-	if( errorCode != NO_ERROR )
+	if( errorCode != NO_ERROR && errorCode != NO_OUTPUT_FILE_ERROR)
 	{
 		displayErrorMessage(errorCode);
 		
@@ -39,61 +40,137 @@ int main(int argc, char const *argv[])
 		displayErrorMessage(errorCode);
 	}
 
+
    // initialize varibles
    unsigned int *pixmap;
-   const char READ_FILE_FLAG[] = "r";
-   const char WRITE_FILE_FLAG[] = "w";
-   FILE *filePtr;
-   int ppmConversionType = atoi(argv[1]);
-   char const *fileName = argv[2];
-   char const *outFileName = argv[3];
 
+   FILE *filePtr;
+   
+   int ppmConversionType = atoi(argv[1]);
+   
+   char const *fileName = argv[2];
+   
+   
+   //TODO: verify that a file name was given, otherwise, create ones
+   char const *outFileName = argv[3];
+   
+   
+   
    // open file for reading
    filePtr = fopen(fileName, READ_FILE_FLAG);
 
    // get header information
-   *header = readHeader(filePtr);
+   FileHeader *header = readHeader(filePtr);
+   
+   //if receved null pointer
+      //end gracefully
 
-   // read file depending on type
-   if(header->ppmType == PPM3)
-   {
-	   readFileP3(filePtr, pixmap);
-   }
-   else
-   {
-	   readFileP6(filePtr, pixmap);
-   }
-  
-   // create out file
-   FILE outFile;
-	
-   outFile = fopen(outFileName, WRITE_FILE_FLAG);
-
-   if(
-   // convert file to P3
-      // function: writeToP3()
-   if (ppmConversionType == 3)
-   {
-      writeToP3(outFile, pixmap);
-   }
-
-   // convert file to P6
-      // fuction: writeToP6()
-   else
-   {
-      writeToP6(outFile, pixmap);
-   }
+//   // read file depending on type
+//   if(header->ppmType == PPM3)
+//   {
+//	   readFileP3(filePtr, header, pixmap);
+//   }
+//   else
+//   {
+//	   readFileP6(filePtr, header, pixmap);
+//   }
+//  
+//   // create out file
+//   FILE outFile;
+//	
+//   outFile = fopen(outFileName, WRITE_FILE_FLAG);
+//
+//   if(
+//   // convert file to P3
+//      // function: writeToP3()
+//   if (ppmConversionType == 3)
+//   {
+//      writeToP3(outFile, pixmap);
+//   }
+//
+//   // convert file to P6
+//      // fuction: writeToP6()
+//   else
+//   {
+//      writeToP6(outFile, pixmap);
+//   }
 
    // return 0
-   return 0;
+   return EXIT_SUCCESS;
 }
+
+/*
+Identifies the file and reads the parameters of height, width, and max
+*/
+FileHeader *readHeader(FILE *filePtr)
+{
+   //initialize variables
+   FileHeader *header = malloc(sizeof(FileHeader));
+   header->height = 0;
+   header->width = 0;
+   header->max = 0;
+   char ch = 0;
+   int value = 0;
+   char dataBuffer[100];
+   
+   //read in first line
+   //if not equal to p3 or p6
+      //call print error function
+      
+      //return null pointer
+
+   //read the first line of file to determine header
+   fscanf(filePtr, "P%i\n", &value);
+
+   //determine ppm type and validity
+   if(value != 3 && value != 6)
+   {
+      displayErrorMessage(PPM_TYPE_ERROR);
+   }
+   //assign type value
+   header->ppmType = value;
+   
+   ch = fgetc(filePtr);
+   
+   //loop through rest of header
+   while(!feof(filePtr) && header->max == 0)
+   {
+       if(ch == '#')
+       {
+           do
+           {
+              ch = fgetc(filePtr);
+           } while (ch != '\n');
+       }
+       
+      //assign the width, height, and max with each int encounter
+      fscanf(filePtr, "%s", dataBuffer);
+      value = atoi(dataBuffer);
+      if(header->width == 0)
+      {
+         header->width = value;
+      }
+      else if(header->height == 0)
+      {
+         header->height = value;
+      }
+      else
+      {
+         header->max = value;
+      }
+   }
+   
+   return header;
+   
+}
+
 
 /* Ascii information
 *
 *
 *
 */
-void readFileP3(FILE *filePtr, unsigned int *pixmap)
+void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
    // intialize varibles
    int heightIndex;
@@ -147,7 +224,7 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
 *
 *
 */
-void writeToP3(FILE *filePtr, unsigned int *pixmap)
+void writeToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
    // declare variables
    unsigned int *pixel;
@@ -179,7 +256,7 @@ void writeToP3(FILE *filePtr, unsigned int *pixmap)
 
 /* write to a file in P6 style
 */
-void writeToP6(FILE *filePtr, unsigned int *pixmap)
+void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
    // declare variables
    unsigned int *pixel;
@@ -219,7 +296,7 @@ void writeToP6(FILE *filePtr, unsigned int *pixmap)
 *
 *
 */
-void readFileP6(FILE *filePtr, unsigned int *pixmap)
+void readFileP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
    // intialize varibles
    int heightIndex;
@@ -267,60 +344,6 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
 
 }
 
-/*
-Identifies the file and reads the parameters of height, width, and max
-*/
-void readHeader(FILE *filePtr)
-{
-   //initialize variables
-   header = (FileHeader *)malloc(sizeof(FileHeader));
-   header->height = 0; 
-   header->width = 0;
-   header->max = 0;
-   char ch = 0;
-   int value = 0;
-   char dataBuffer[100];
-
-   //read the first line of file to determine header
-   fscanf(filePtr, "P%i\n", &value);
-
-   //determine ppm type and validity
-   if(value != 3 && value != 6)
-   {
-      displayErrorMessage(PPM_TYPE_ERROR);
-   }
-   //assign type value
-   header->ppmType = value;
-
-   //loop through rest of header
-   while(!feof(filePtr) || header->max != 0)
-   {
-       if(ch == '#')
-       {
-           do
-           {
-              ch = fgetc(filePtr);
-           } while (ch != '\n');
-           ch = getc(filePtr);           
-       }
-       
-      //assign the width, height, and max with each int encounter
-      fscanf(filePtr, "%s", dataBuffer);
-      value = atoi(dataBuffer);
-      if(header->width == 0)
-      {
-         header->width = value;
-      }
-      else if(header->height == 0)
-      {
-         header->width = value;
-      }
-      else
-      {
-         header->max = value;
-      }
-   }
-}
 
 int validateParams(int argc, char const *argv[] )
 {
