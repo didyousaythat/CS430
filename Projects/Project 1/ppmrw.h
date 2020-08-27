@@ -4,16 +4,16 @@
 
 //error message 
 //error message constants
-typedef enum paramErrorCodes
+typedef enum ParamErrorCodes
 {
    NO_ERROR,
    ARGUMENT_NUM_ERROR,
    NO_OUTPUT_FILE_ERROR,
    PPM_TYPE_ERROR,
-} paramErrorCodes;
+} ParamErrorCodes;
 
 // struct for fileHeader
-struct fileHeader
+typedef struct FileHeader
 {
    int height;
 
@@ -21,7 +21,7 @@ struct fileHeader
 
    int ppmType;
 
-};
+} FileHeader;
 
 //file name constants
 extern const char INPUT_FILE_NAME[];
@@ -38,7 +38,7 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap);
 void readFileP6(FILE *filePtr, unsigned int *pixmap);
 void writeToP3(FILE *filePtr, unsigned int *pixmap);
 void writeToP6(FILE *filePtr, unsigned int *pixmap);
-struct fileHeader readHeader(FILE *filePtr);
+struct FileHeader readHeader(FILE *filePtr);
 int validateParams(int argc, char const *argv[] );
 void displayErrorMessage(int errorCode);
 

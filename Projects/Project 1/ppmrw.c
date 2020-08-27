@@ -8,11 +8,12 @@
 const int ARGUMENT_NUMBER = 4;
 const int PPM3 = 3;
 const int PPM6 = 6;
-struct fileHeader *fileHeader;
+struct FileHeader *header;
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "ppmrw.h"
 
 
@@ -41,7 +42,7 @@ int main(int argc, char const *argv[])
    // initialize varibles
    unsigned int *pixmap;
    const char READ_FILE_FLAG[] = "r";
-   FILE * filePtr;
+   FILE *filePtr;
    int ppmConversionType = atoi(argv[1]);
    char const *fileName = argv[2];
 
@@ -49,10 +50,10 @@ int main(int argc, char const *argv[])
    filePtr = fopen(fileName, READ_FILE_FLAG);
 
    // get header information
-   *fileHeader = readHeader(filePtr);
+   *header = readHeader(filePtr);
 
    // read file depending on type
-   if(fileHeader->ppmType == PPM3)
+   if(header->ppmType == PPM3)
    {
 	   readFileP3(filePtr, pixmap);
    }
@@ -96,9 +97,9 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
    int rgbTempVal;
 
    // declare variables
-   heightIndex = fileHeader->height;
+   heightIndex = header->height;
 
-   widthIndex = fileHeader->width;
+   widthIndex = header->width;
 
    // allocate memory for pixmap
    pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
@@ -160,9 +161,9 @@ void readFileP6(FILE *filePtr, unsigned int *pixmap)
    unsigned int rgbBytes;
 
    // declare variables
-   heightIndex = fileHeader->height;
+   heightIndex = header->height;
 
-   widthIndex = fileHeader->width;
+   widthIndex = header->width;
 
    // asssign size
    pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
@@ -210,11 +211,11 @@ void writeToP6(FILE *filePtr, unsigned int *pixmap)
 /*
 *
 */
-struct fileHeader readHeader(FILE *filePtr)
+struct FileHeader readHeader(FILE *filePtr)
 {
    // initialize varibles
    int lineCtr = 0;
-   fileHeader->height = 0, fileHeader->width = 0;
+   header->height = 0, header->width = 0;
    int ch = 0;
    char dataBuffer[100];
    ch = fgetc(filePtr);
@@ -231,14 +232,14 @@ struct fileHeader readHeader(FILE *filePtr)
 
        if(fscanf(filePtr, '%d') != 1)
        {
-          if(fileHeader->width == 0)
+          if(header->width == 0)
           {
-             fileHeader->width = ch;
+             header->width = ch;
           }
        }
    }
-   //fileHeader.height = height;
-   //fileHeader.width = width;
+   //FileHeader.height = height;
+   //FileHeader.width = width;
    //
 }
 
