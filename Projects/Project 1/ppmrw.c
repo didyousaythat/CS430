@@ -42,9 +42,11 @@ int main(int argc, char const *argv[])
    // initialize varibles
    unsigned int *pixmap;
    const char READ_FILE_FLAG[] = "r";
+   const char WRITE_FILE_FLAG[] = "w";
    FILE *filePtr;
    int ppmConversionType = atoi(argv[1]);
    char const *fileName = argv[2];
+   char const *outFileName = argv[3];
 
    // open file for reading
    filePtr = fopen(fileName, READ_FILE_FLAG);
@@ -61,19 +63,25 @@ int main(int argc, char const *argv[])
    {
 	   readFileP6(filePtr, pixmap);
    }
+  
+   // create out file
+   FILE outFile;
+	
+   outFile = fopen(outFileName, WRITE_FILE_FLAG);
 
+   if(
    // convert file to P3
       // function: writeToP3()
    if (ppmConversionType == 3)
    {
-      writeToP3(filePtr, pixmap);
+      writeToP3(outFile, pixmap);
    }
 
    // convert file to P6
       // fuction: writeToP6()
    else
    {
-      writeToP6(filePtr, pixmap);
+      writeToP6(outFile, pixmap);
    }
 
    // return 0
@@ -141,11 +149,68 @@ void readFileP3(FILE *filePtr, unsigned int *pixmap)
 */
 void writeToP3(FILE *filePtr, unsigned int *pixmap)
 {
+   // declare variables
+   unsigned int *pixel;
+   int heightIndex;
+   int widthIndex;
+   int fileHeight;
+   int fileWidth;
+	
+   // set the fileHeight to header info
+   fileHeight = header->height;
 
+   fileWidth = header->width;
+	
+   // set the pixel pointer to pixmap;
+   pixel = pixmap;
+	
+   // first write header info to file
+	
+      // write the filetype
+    
+      // write the height and width
+	
+      // write the channel number
+	
+   // next write body info to file in P3 style
+   
+   
 }
 
+/* write to a file in P6 style
+*/
 void writeToP6(FILE *filePtr, unsigned int *pixmap)
 {
+   // declare variables
+   unsigned int *pixel;
+   int heightIndex;
+   int widthIndex;
+   int fileHeight;
+   int fileWidth;
+	
+   // set the fileHeight to header info
+   fileHeight = header->height;
+
+   fileWidth = header->width;
+	
+   // set the pixel pointer to pixmap;
+   pixel = pixmap;
+	
+   // first write header info to file
+      
+      // write the filetype
+    
+      // write the height and width
+	
+      // write the channel number
+	
+   // next write body info to file in P6 style
+
+      // convert int to binary 
+	
+      // write to file 
+	
+      // add new line ?
    
 }
 
