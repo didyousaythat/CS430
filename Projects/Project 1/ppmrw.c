@@ -25,6 +25,18 @@ const char WRITE_FILE_FLAG[] = "w";
 */
 int main(int argc, char const *argv[])
 {
+   
+   // declare and instantiate varibles
+   unsigned int *pixmap;
+   FILE *filePtr;
+   // create out file
+   FILE *outFile;
+   int ppmConversionType = atoi(argv[1]);
+   char const *fileName = argv[2];
+   
+   
+   //TODO: verify that a file name was given, otherwise, create one
+   char const *outFileName = argv[3];
    // validate if given Params are valid
    int errorCode = validateParams( argc,  argv );
 	
@@ -38,25 +50,13 @@ int main(int argc, char const *argv[])
 	if( errorCode == NO_OUTPUT_FILE_ERROR )
 	{
 		displayErrorMessage(errorCode);
-      
 
+      outFile = fopen(outFileName, "x");
 	}
-
-
-   // initialize varibles
-   unsigned int *pixmap;
-
-   FILE *filePtr;
-   
-   int ppmConversionType = atoi(argv[1]);
-   
-   char const *fileName = argv[2];
-   
-   
-   //TODO: verify that a file name was given, otherwise, create one
-   char const *outFileName = argv[3];
-   
-   
+   else 
+   {
+      outFile = fopen(outFileName, WRITE_FILE_FLAG);
+   }
    
    // open file for reading
    filePtr = fopen(fileName, READ_FILE_FLAG);
@@ -72,44 +72,49 @@ int main(int argc, char const *argv[])
       return 0;
    }
    
+   // temp remove
    printf("reading a %d ppm file", header->ppmType);
 
    // read file depending on type
    if(header->ppmType == PPM3)
    {
-      readFileP3(filePtr, header, pixmap);
+      pixmap = readFileP3(filePtr, header);
    }
    else
    {
-	   readFileP6(filePtr, header, pixmap);
+	   pixmap = readFileP6(filePtr, header);
    }
-  
-   // create out file
-   FILE *outFile;
 	
-   outFile = fopen(outFileName, WRITE_FILE_FLAG);
 
-//   if(
-//   // convert file to P3
-//      // function: writeToP3()
-//   if (ppmConversionType == 3)
-//   {
-//      writeToP3(outFile, pixmap);
-//   }
-//
-//   // convert file to P6
-//      // fuction: writeToP6()
-//   else
-//   {
-//      writeToP6(outFile, pixmap);
-//   }
+   // convert file to P3
+      // function: writeToP3()
+   if (ppmConversionType == 3)
+   {
+      writeToP3(outFile, header,  pixmap);
+   }
+   // convert file to P6
+      // fuction: writeToP6()
+   else
+   {
+      writeToP6(outFile, header, pixmap);
+   }
+   
+   // closed the files and freeded the memory
+   fclose(filePtr);
+
+   fclose(outFile);
+
+   free(header);
+
+   free(pixmap);
 
    // return 0
    return EXIT_SUCCESS;
 }
 
-/*
-Identifies the file and reads the parameters of height, width, and max
+/* Identifies the file and reads the parameters of height, width, and max
+*
+*
 */
 FileHeader *readHeader(FILE *filePtr)
 {
@@ -129,21 +134,31 @@ FileHeader *readHeader(FILE *filePtr)
       //return null pointer
 
    //read the first line of file to determine header
-   fscanf(filePtr, "P%i\n", &value);
+   fscanf(filePtr, "%s\n", dataBuffer);
 
    //determine ppm type and validity
-   if(value != 3 && value != 6)
+   if(strcmp(dataBuffer, "P3") != 0 && strcmp(dataBuffer, "P6") != 0)
    {
-      displayErrorMessage(PPM_TYPE_ERROR);
+      //PPM header type error
+      displayErrorMessage(PPM_HEADER_TYPE_ERROR);
+      return NULL;
    }
    //assign type value
-   header->ppmType = value;
+   if(strcmp(dataBuffer, "P3") == 0)
+   {
+      header->ppmType = PPM3;
+   }
+   else
+   {
+      header->ppmType = PPM6;
+   }
    
    ch = fgetc(filePtr);
    
    //loop through rest of header
    while(!feof(filePtr) && header->max == 0)
    {
+       //skip comments
        if(ch == '#')
        {
            do
@@ -166,6 +181,12 @@ FileHeader *readHeader(FILE *filePtr)
       else
       {
          header->max = value;
+         //Check if channel value is higher than max (255)
+         if(header->max > 255)
+         {
+            displayErrorMessage(HEADER_MAX_VALUE_ERROR);
+            return NULL;
+         }
       }
    }
    
@@ -179,7 +200,7 @@ FileHeader *readHeader(FILE *filePtr)
 *
 *
 */
-void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
+unsigned int *readFileP3(FILE *filePtr, FileHeader *header)
 {
    // intialize varibles
    int heightIndex;
@@ -187,6 +208,7 @@ void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    int fileHeight;
    int fileWidth;
    unsigned int *pixel;
+   unsigned int *pixmap;
    int rgbTempVal;
 
    // declare variables
@@ -194,8 +216,8 @@ void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 
    fileWidth = header->width;
 
-   // allocate memory for pixmap
-   pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
+   // allocate memory for pixmaps
+   pixmap = (unsigned int *)malloc(fileHeight * fileWidth * sizeof(unsigned int));
 
    // make a pixel
    pixel = pixmap;
@@ -206,30 +228,82 @@ void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    {
       for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
-         // scan the red pixel and place into the pixel array
-         fscanf(filePtr, "%d", &rgbTempVal);
+         fscanf(filePtr, "%d\n", &rgbTempVal);
 
-         printf("reading the red pixel: %d", rgbTempVal);
-
-         pixel[0] = rgbTempVal;
+         *pixel = rgbTempVal;
+         pixel++;
          
-         printf("Made it to other side of memory");
-
          // scan the green pixel and place into the pixel array
-         fscanf(filePtr, "%d", &rgbTempVal);
+         fscanf(filePtr, "%d\n", &rgbTempVal);
 
-         pixel[1] = rgbTempVal;
+         *pixel = rgbTempVal;
+         pixel++;
 
          // scan the blue pixel and place into the pixel array
-         fscanf(filePtr, "%d", &rgbTempVal);
+         fscanf(filePtr, "%d\n", &rgbTempVal);
 
-         pixel[2] = rgbTempVal;
-
-         // move the pixel pointer three spaces
-         pixel += 3;
-
+         *pixel = rgbTempVal;
+         pixel++;
       }
    }
+   
+   // returning the pixmap
+   return pixmap;
+}
+
+
+/* Reading the Byte information
+*
+*
+*
+*/
+unsigned int *readFileP6(FILE *filePtr, FileHeader *header)
+{
+   // intialize varibles
+   int heightIndex;
+   int widthIndex;
+   int fileHeight;
+   int fileWidth;
+   unsigned int *pixel;
+   unsigned int *pixmap;
+   unsigned int rgbBytes;
+
+   // declare variables
+   fileHeight = header->height;
+
+   fileWidth = header->width;
+
+   // asssign size
+   pixmap = (unsigned int *)malloc(fileWidth * fileHeight * sizeof(unsigned int));
+
+   // make a pixel
+   pixel = pixmap;
+
+   // read the height and the width of the file and assign to variables
+   // make a for loop for height and width
+   for (heightIndex = 0; heightIndex < fileHeight; heightIndex++)
+   {
+      for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
+      {
+         // scan bytes and store in rgbBytes
+         fread(&rgbBytes, 1, 3, filePtr);
+
+         // translate binary to integers and store red pixel first
+         *pixel = rgbBytes & 0xff;
+         pixel++;
+         // translate binary to integers and store green pixel
+
+         *pixel = (rgbBytes >> 8) & 0xff;
+         pixel++;
+         // translate binary to integers and store blue pixel 
+
+         *pixel = (rgbBytes >> 16) & 0xff;
+         pixel++;
+      }
+   }
+
+   // return the pixmap
+   return pixmap;
 }
 
 /* Writes a file that is in p3 format
@@ -255,19 +329,35 @@ void writeToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    pixel = pixmap;
 	
    // first write header info to file
-	
-      // write the filetype
-    
-      // write the height and width
-	
-      // write the channel number
-	
+   
+      // write the file header
+      fprintf(filePtr, "P%d\n", header->ppmType);
+      fprintf(filePtr, "%d %d\n", header->width, header->height);
+      fprintf(filePtr, "%d\n", header->max);
+            	
    // next write body info to file in P3 style
-   
-   
+   for(heightIndex = 0; heightIndex < fileHeight; heightIndex++)
+   {
+      for(widthIndex = 0; widthIndex < fileWidth; widthIndex++)
+      {
+         // writing the red pixel
+         fprintf(filePtr, "%d\n", *pixel);
+         pixel++;
+
+         // writing the green pixel
+         fprintf(filePtr, "%d\n", *pixel);
+         pixel++;
+
+         // wirting the blue pixel
+         fprintf(filePtr, "%d\n", *pixel);
+         pixel++;
+      }  
+   }   
 }
 
 /* write to a file in P6 style
+*
+*
 */
 void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
@@ -287,75 +377,33 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    pixel = pixmap;
 	
    // first write header info to file
-      
-      // write the filetype
-    
-      // write the height and width
-	
-      // write the channel number
-	
-   // next write body info to file in P6 style
-
-      // convert int to binary 
-	
-      // write to file 
-	
-      // add new line ?
    
-}
+      // write the file header
+      fprintf(filePtr, "P%d\n", header->ppmType);
+      fprintf(filePtr, "%d %d\n", header->width, header->height);
+      fprintf(filePtr, "%d\n", header->max);
+	
 
-/* Byte information
-*
-*
-*
-*/
-void readFileP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
-{
-   // intialize varibles
-   int heightIndex;
-   int widthIndex;
-   int fileHeight;
-   int fileWidth;
-   unsigned int *pixel;
-   unsigned int rgbBytes;
-
-   // declare variables
-   fileHeight = header->height;
-
-   fileWidth = header->width;
-
-   // asssign size
-   pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
-
-   // make a pixel
-   pixel = pixmap;
-
-   // read the height and the width of the file and assign to variables
-   // make a for loop for height and width
-   for (heightIndex = 0; heightIndex < fileHeight; heightIndex++)
+   // next write body info to file in P6 style
+   for(heightIndex = 0; heightIndex < fileHeight; heightIndex++)
    {
-      for ( widthIndex = 0; widthIndex < fileWidth; widthIndex++)
+      for(widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
-         // scan bytes and store in rgbBytes
-         fread(&rgbBytes, 1, 3, filePtr);
+         // convert int to binary
+         // byte = pixel;
 
-         // translate binary to integers and store red pixel first
-         pixel[0] = rgbBytes & 0xff;
+         fwrite(pixel, 1, 3, filePtr);
 
-         // translate binary to integers and store green pixel
+         // pixel++;
+         
+         // byte = *pixel << 8 
+         // pixel = 0xff << 24 | blue << 16 | green << 8 | red;
 
-         pixel[1] = (rgbBytes >> 8) & 0xff;
-
-         // translate binary to integers and store blue pixel 
-
-         pixel[2] = (rgbBytes >> 16) & 0xff;
-
-         // move the pixel pointer three spaces
-         pixel += 3;
-      }
+         // fwrite(bytePixel, 1, 3, filePtr)
+      }  
    }
-
 }
+
 
 
 int validateParams(int argc, char const *argv[] )
@@ -385,17 +433,18 @@ int validateParams(int argc, char const *argv[] )
 	{
 		return NO_ERROR;
 	}
-
 }
 
 void displayErrorMessage(int errorCode)
 {
-	char errorMsgs[6][200] = {
+	char errorMsgs[7][200] = {
 		"No Error",
 		"Wrong number of command line arguments. The format should follow:\n\n"
 			"\t<ppmToConvertTo inputFile outputFile>\n",
 		"No output file was provided, data will be written to output.ppm\n",
-		"PPM type to convert to must be either a 3 or a 6\n" };
+		"PPM type to convert to must be either a 3 or a 6\n",
+      "PPM type in header file not recognized as P3 or P6.",
+      "Color value in header exceeds max." };
 					
 	printf("%s\nProgram terminated.", errorMsgs[errorCode] );
 }
