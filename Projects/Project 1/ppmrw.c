@@ -217,7 +217,7 @@ unsigned int *readFileP3(FILE *filePtr, FileHeader *header)
    fileWidth = header->width;
 
    // allocate memory for pixmaps
-   pixmap = (unsigned int *)malloc(fileHeight * fileWidth * sizeof(unsigned int));
+   pixmap = (unsigned int *)malloc(fileHeight * fileWidth * 3 * sizeof(unsigned int));
 
    // make a pixel
    pixel = pixmap;
@@ -274,7 +274,7 @@ unsigned int *readFileP6(FILE *filePtr, FileHeader *header)
    fileWidth = header->width;
 
    // asssign size
-   pixmap = (unsigned int *)malloc(fileWidth * fileHeight * sizeof(unsigned int));
+   pixmap = (unsigned int *)malloc(fileWidth * fileHeight * 3 * sizeof(unsigned int));
 
    // make a pixel
    pixel = pixmap;
