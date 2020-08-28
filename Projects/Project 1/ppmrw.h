@@ -10,6 +10,8 @@ typedef enum ParamErrorCodes
    ARGUMENT_NUM_ERROR,
    NO_OUTPUT_FILE_ERROR,
    PPM_TYPE_ERROR,
+   PPM_HEADER_TYPE_ERROR,
+   HEADER_MAX_VALUE_ERROR
 } ParamErrorCodes;
 
 // struct for fileHeader
@@ -39,8 +41,8 @@ extern const char WRITE_FILE_FLAG[];
 
 //method prototypes
 int validateParams( int num_of_params, char const *argv[] );
-void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap);
-void readFileP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap);
+unsigned int *readFileP3(FILE *filePtr, FileHeader *header);
+unsigned int *readFileP6(FILE *filePtr, FileHeader *header);
 void writeToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap);
 void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap);
 FileHeader *readHeader(FILE *filePtr);
