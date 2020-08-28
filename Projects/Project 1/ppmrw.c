@@ -37,6 +37,7 @@ int main(int argc, char const *argv[])
    
    //TODO: verify that a file name was given, otherwise, create one
    char const *outFileName = argv[3];
+
    // validate if given Params are valid
    int errorCode = validateParams( argc,  argv );
 	
