@@ -371,6 +371,10 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    int widthIndex;
    int fileHeight;
    int fileWidth;
+   unsigned int pixelBuffer;
+   unsigned int red;
+   unsigned int green;
+   unsigned int blue;
 	
    // set the fileHeight to header info
    fileHeight = header->height;
@@ -393,17 +397,27 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    {
       for(widthIndex = 0; widthIndex < fileWidth; widthIndex++)
       {
-         // convert int to binary
-         // byte = pixel;
+         // get each of the color values and store them in temp Values
+         red = *pixel;
 
-         fwrite(pixel, 1, 3, filePtr);
+         pixel++;
 
-         pixel += 3;
+         green = *pixel;
+
+         pixel++;
+
+         blue = *pixel;
+
+         pixel++;
+
+         // convert to binary and pack them 
+
+         pixelBuffer =  blue << 16 | green << 8 | red;
+
+         // finally write to file
+
+         fwrite(pixelBuffer, 1, 3, filePtr);
          
-         // byte = *pixel << 8 
-         // pixel = 0xff << 24 | blue << 16 | green << 8 | red;
-
-         // fwrite(bytePixel, 1, 3, filePtr)
       }  
    }
 }
