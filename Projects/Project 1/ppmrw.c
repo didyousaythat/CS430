@@ -66,22 +66,29 @@ int main(int argc, char const *argv[])
    
    //if receved null pointer
       //end gracefully
+   if(header == NULL)
+   {
+      printf("Header info read error:");
+      return 0;
+   }
+   
+   printf("reading a %d ppm file", header->ppmType);
 
-//   // read file depending on type
-//   if(header->ppmType == PPM3)
-//   {
-//	   readFileP3(filePtr, header, pixmap);
-//   }
-//   else
-//   {
-//	   readFileP6(filePtr, header, pixmap);
-//   }
-//  
-//   // create out file
-//   FILE outFile;
-//	
-//   outFile = fopen(outFileName, WRITE_FILE_FLAG);
-//
+   // read file depending on type
+   if(header->ppmType == PPM3)
+   {
+      readFileP3(filePtr, header, pixmap);
+   }
+   else
+   {
+	   readFileP6(filePtr, header, pixmap);
+   }
+  
+   // create out file
+   FILE *outFile;
+	
+   outFile = fopen(outFileName, WRITE_FILE_FLAG);
+
 //   if(
 //   // convert file to P3
 //      // function: writeToP3()
@@ -183,9 +190,9 @@ void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    int rgbTempVal;
 
    // declare variables
-   heightIndex = header->height;
+   fileHeight = header->height;
 
-   widthIndex = header->width;
+   fileWidth = header->width;
 
    // allocate memory for pixmap
    pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
@@ -202,7 +209,11 @@ void readFileP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
          // scan the red pixel and place into the pixel array
          fscanf(filePtr, "%d", &rgbTempVal);
 
+         printf("reading the red pixel: %d", rgbTempVal);
+
          pixel[0] = rgbTempVal;
+         
+         printf("Made it to other side of memory");
 
          // scan the green pixel and place into the pixel array
          fscanf(filePtr, "%d", &rgbTempVal);
@@ -309,9 +320,9 @@ void readFileP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    unsigned int rgbBytes;
 
    // declare variables
-   heightIndex = header->height;
+   fileHeight = header->height;
 
-   widthIndex = header->width;
+   fileWidth = header->width;
 
    // asssign size
    pixmap = (unsigned int *)malloc(widthIndex * heightIndex * sizeof(int));
@@ -388,17 +399,3 @@ void displayErrorMessage(int errorCode)
 					
 	printf("%s\nProgram terminated.", errorMsgs[errorCode] );
 }
-
-
-
-// CC = gcc
-// CFLAGS = -Wall
-// RM = rm -f
-//
-// all: ppmConverter
-//
-// ppmConverter: ppmConverter.c
-// 	$(CC) $(CFLAGS) ppmConverter.c -o ppmConverter
-//
-// clean:
-// 	$(RM) ppmConverter *~
