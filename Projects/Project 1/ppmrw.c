@@ -290,10 +290,10 @@ unsigned int *ppmReadFileP6(FILE *filePtr, FileHeader *header)
 }
 
 /*
-* Takes a PPM3 file and writes to a PPM3 format
+* Takes a PPM file and writes to a PPM3 format
 * Params:  the pointer to the ppm file to be written to
 *          the file header structs
-*          a pixmap of 
+*          a pixmap array of unsigned ints
 */
 void ppmWriteToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
@@ -335,7 +335,12 @@ void ppmWriteToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
     }   
 }
 
-
+/*
+* Takes a PPM file and writes to a PPM6 format
+* Params:  the pointer to the ppm file to be written to
+*          the file header structs
+*          a pixmap array of unsigned ints 
+*/
 void ppmWriteToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 {
     // declare variables
@@ -395,7 +400,11 @@ void ppmWriteToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
     }
 }
 
-
+/*
+* Validates the inputs given in terminal and returns error codes on invalid check
+* Params:   int number of arguments in line
+*           char array of input strings given
+*/
 int ppmValidateParams( int argc, char const *argv[] )
 {
 		
@@ -425,6 +434,10 @@ int ppmValidateParams( int argc, char const *argv[] )
 	}
 }
 
+/*
+* Displays error message from an array of possible errors,
+* Params:   integer number representing the errorcode to print the message
+*/
 void ppmDisplayErrorMessage(int errorCode)
 {
 	char errorMsgs[10][200] = {
