@@ -192,9 +192,8 @@ FileHeader *readHeader(FILE *filePtr)
          }
       }
    }
-   
+   ch = fgetc(filePtr);
    return header;
-   
 }
 
 
@@ -412,16 +411,15 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 
          // convert to binary and pack them 
 
-         pixelBuffer =  blue << 16 | green << 8 | red;
+         pixelBuffer = 0xff << 24 | blue << 16 | green << 8 | red;
 
          // finally write to file
 
-         fwrite(pixelBuffer, 1, 3, filePtr);
+         fwrite(&pixelBuffer, 1, 3, filePtr);
          
       }  
    }
 }
-
 
 
 int validateParams(int argc, char const *argv[] )
