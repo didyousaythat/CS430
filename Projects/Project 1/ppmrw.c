@@ -126,6 +126,7 @@ FileHeader *readHeader(FILE *filePtr)
    if(value != 3 && value != 6)
    {
       displayErrorMessage(PPM_TYPE_ERROR);
+      return NULL;
    }
    //assign type value
    header->ppmType = value;
