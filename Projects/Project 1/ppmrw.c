@@ -18,7 +18,7 @@ const char WRITE_FILE_FLAG[] = "w";
 #include "ppmrw.h"
 
 
-/*
+/* Main of our function that converts a P3 to P6, P3 to P3, P6 to P3, P6 to P6
 * Params: argv[1] the PPM to convert to, either 3 or 6
           argv[2] the input file in ppm format
           argv[3] the output file to be written to
@@ -29,7 +29,6 @@ int main(int argc, char const *argv[])
    // declare and instantiate varibles
    unsigned int *pixmap;
    FILE *filePtr;
-   // create out file
    FILE *outFile;
    int ppmConversionType = atoi(argv[1]);
    char const *fileName = argv[2];
@@ -74,15 +73,17 @@ int main(int argc, char const *argv[])
    }
    
    // temp remove
-   printf("reading a %d ppm file", header->ppmType);
+   printf("Reading a P%d ppm file.\n", header->ppmType);
 
    // read file depending on type
    if(header->ppmType == PPM3)
-   {
+   { 
+      // assign to pixmap
       pixmap = readFileP3(filePtr, header);
    }
    else
    {
+      // assign to pixmap
 	   pixmap = readFileP6(filePtr, header);
    }
 	
@@ -144,6 +145,7 @@ FileHeader *readHeader(FILE *filePtr)
       displayErrorMessage(PPM_HEADER_TYPE_ERROR);
       return NULL;
    }
+
    //assign type value
    if(strcmp(dataBuffer, "P3") == 0)
    {
@@ -332,7 +334,7 @@ void writeToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    // first write header info to file
    
       // write the file header
-      fprintf(filePtr, "P%d\n", header->ppmType);
+      fprintf(filePtr, "P%d\n", PPM3);
       fprintf(filePtr, "%d %d\n", header->width, header->height);
       fprintf(filePtr, "%d\n", header->max);
             	
@@ -356,7 +358,8 @@ void writeToP3(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    }   
 }
 
-/* write to a file in P6 style
+/* TODO
+   write to a file in P6 style
 *
 *
 */
@@ -380,7 +383,7 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
    // first write header info to file
    
       // write the file header
-      fprintf(filePtr, "P%d\n", header->ppmType);
+      fprintf(filePtr, "P%d\n", PPM6);
       fprintf(filePtr, "%d %d\n", header->width, header->height);
       fprintf(filePtr, "%d\n", header->max);
 	
@@ -395,7 +398,7 @@ void writeToP6(FILE *filePtr, FileHeader *header, unsigned int *pixmap)
 
          fwrite(pixel, 1, 3, filePtr);
 
-         // pixel++;
+         pixel += 3;
          
          // byte = *pixel << 8 
          // pixel = 0xff << 24 | blue << 16 | green << 8 | red;
